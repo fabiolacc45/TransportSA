@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Reportes</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; }
+        header { background-color: #4CAF50; color: #fff; padding: 1rem; text-align: center; }
+        nav { display: flex; justify-content: center; padding: 1rem; background-color: #333; }
+        nav button { background-color: #4CAF50; color: #fff; padding: 0.5rem 1rem; cursor: pointer; }
+        .vista { padding: 1rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.5rem; border: 1px solid #ddd; text-align: center; }
+    </style>
+</head>
+<body>
+    <nav>
+        <button onclick="location.href='usuario.html'">Gestión de Usuarios</button>
+        <button onclick="location.href='pedidos.html'">Pedidos</button>
+        <button onclick="location.href='inventario.html'">Inventario</button>
+        <button onclick="location.href='seguimiento.html'">Seguimiento de Pedidos</button>
+        <button onclick="location.href='reportes.html'">Reportes</button>
+        <button onclick="location.href='index.html'">Inicio</button>
+    </nav>
+    <header><h1>Reportes</h1></header>
+    <nav><button onclick="generarReporte()">Generar Reporte de Ventas</button></nav>
+    <div class="vista">
+        <h2>Reporte de Ventas</h2>
+        <table id="tablaReportes">
+            <thead><tr><th>ID Pedido</th><th>Producto</th><th>Cantidad</th><th>Fecha</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        async function generarReporte() {
+            const tabla = document.getElementById('tablaReportes').querySelector('tbody');
+            tabla.innerHTML = '';
+            try {
+                const response = await fetch('http://localhost:5000/reportes');
+                const data = await response.json();
+                data.forEach(reporte => {
+                    const row = tabla.insertRow();
+                    row.innerHTML = `<td>${reporte.id}</td><td>${reporte.producto_id}</td><td>${reporte.cantidad}</td><td>${reporte.fecha}</td>`;
+                });
+            } catch (error) { console.error("Error al generar reporte:", error); }
+        }
+    </script>
+</body>
+</html>

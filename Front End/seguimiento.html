@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguimiento de Pedidos</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; }
+        header { background-color: #4CAF50; color: #fff; padding: 1rem; text-align: center; }
+        .vista { padding: 1rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.5rem; border: 1px solid #ddd; text-align: center; }
+    </style>
+</head>
+<body>
+    <header><h1>Seguimiento de Pedidos</h1></header>
+    <div class="vista">
+        <h2>Pedidos</h2>
+        <table id="tablaSeguimiento">
+            <thead><tr><th>ID</th><th>Producto</th><th>Cantidad</th><th>Fecha</th></tr></thead>
+            <tbody></tbody>
+        </table>
+        <button onclick="cargarPedidos()">Cargar Pedidos</button>
+    </div>
+
+    <script>
+        async function cargarPedidos() {
+            const tabla = document.getElementById('tablaSeguimiento').querySelector('tbody');
+            tabla.innerHTML = '';
+            try {
+                const response = await fetch('http://localhost:5000/pedidos');
+                const data = await response.json();
+                data.forEach(pedido => {
+                    const row = tabla.insertRow();
+                    row.innerHTML = `<td>${pedido.id}</td><td>${pedido.producto_id}</td><td>${pedido.cantidad}</td><td>${pedido.fecha}</td>`;
+                });
+            } catch (error) { console.error("Error al cargar pedidos:", error); }
+        }
+    </script>
+</body>
+</html>

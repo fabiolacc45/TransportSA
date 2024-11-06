@@ -1,0 +1,58 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f4f4f4;
+  }
+  
+  header {
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 1rem;
+    text-align: center;
+  }
+  
+  nav {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #333;
+  }
+  nav button {
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+  }
+  nav button:hover {
+    background-color: rgb(60.5577689243, 139.4422310757, 63.7450199203);
+  }
+  
+  .vista {
+    display: none;
+    padding: 1rem;
+  }
+  
+  .vista.active {
+    display: block;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  table th, table td {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  button {
+    padding: 0.3rem 0.6rem;
+    margin-top: 1rem;
+    cursor: pointer;
+  }
+  
+  /*# sourceMappingURL=style.css.map */
+  

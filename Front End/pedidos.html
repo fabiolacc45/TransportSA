@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Pedidos</title>
+    <style>
+        /* Variables de color */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1rem;
+            background-color: #333;
+        }
+
+        nav button {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+        }
+
+        nav button:hover {
+            background-color: #45a049;
+        }
+
+        .vista {
+            padding: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        button {
+            padding: 0.3rem 0.6rem;
+            margin-top: 1rem;
+            cursor: pointer;
+        }
+
+        select, input {
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            width: 100%;
+            max-width: 300px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    
+    <nav>
+        <button onclick="location.href='usuario.html'">Gestión de Usuarios</button>
+        <button onclick="location.href='pedidos.html'">Pedidos</button>
+        <button onclick="location.href='inventario.html'">Inventario</button>
+        <button onclick="location.href='seguimiento.html'">Seguimiento de Pedidos</button>
+        <button onclick="location.href='reportes.html'">Reportes</button>
+        <button onclick="location.href='index.html'">Inicio</button>
+    </nav>
+
+    <header>
+        <h1>Gestión de Pedidos</h1>
+    </header>
+    <nav>
+        <button onclick="mostrarVista('crearPedido')">Crear Pedido</button>
+        <button onclick="mostrarVista('listarPedidos')">Listar Pedidos</button>
+    </nav>
+    
+    <div id="crearPedido" class="vista">
+        <h2>Crear Pedido</h2>
+        <form onsubmit="crearPedido(event)">
+            <label for="producto">Seleccionar Producto:</label>
+            <select id="producto" required>
+                <option value="">Seleccione un producto</option>
+            </select><br><br>
+
+            <label for="cantidad">Cantidad:</label>
+            <input type="number" id="cantidad" required><br><br>
+
+            <label for="cliente">Cliente:</label>
+            <input type="text" id="cliente" required><br><br>
+
+            <button type="submit">Crear Pedido</button>
+        </form>
+        <p id="mensajePedido"></p>
+    </div>
+
+    <div id="listarPedidos" class="vista">
+        <h2>Listar Pedidos</h2>
+        <button onclick="obtenerPedidos()">Cargar Pedidos</button>
+        <table id="tablaPedidos">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Cliente</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        function mostrarVista(vista) {
+            const vistas = document.querySelectorAll('.vista');
+            vistas.forEach(v => {
+                v.style.display = 'none';
+            });
+            document.getElementById(vista).style.display = 'block';
+        }
+
+        // Cargar productos al cargar la página
+        async function cargarProductos() {
+            try {
+                const response = await fetch('http://localhost:5000/productos');
+                const productos = await response.json();
+                const selectProducto = document.getElementById('producto');
+
+                // Limpiar opciones existentes
+                selectProducto.innerHTML = '';
+
+                // Agregar productos al select
+                productos.forEach(producto => {
+                    const option = document.createElement('option');
+                    option.value = producto.id;
+                    option.textContent = `${producto.nombre} (ID: ${producto.id})`;
+                    selectProducto.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error al cargar productos:', error);
+            }
+        }
+
+        // Crear pedido
+        async function crearPedido(event) {
+            event.preventDefault();
+
+            const productoId = document.getElementById('producto').value;
+            const cantidad = document.getElementById('cantidad').value;
+            const cliente = document.getElementById('cliente').value;
+
+            const pedido = {
+                producto_id: productoId,
+                cantidad: cantidad,
+                cliente: cliente,
+                fecha: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch('http://localhost:5000/pedidos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(pedido),
+                });
+                const data = await response.json();
+                document.getElementById('mensajePedido').textContent = data.mensaje || data.error;
+            } catch (error) {
+                document.getElementById('mensajePedido').textContent = 'Error al crear pedido';
+            }
+        }
+
+        // Obtener pedidos
+        async function obtenerPedidos() {
+            const tabla = document.getElementById('tablaPedidos').querySelector('tbody');
+            tabla.innerHTML = ''; // Limpiar la tabla
+
+            try {
+                const response = await fetch('http://localhost:5000/pedidos');
+                const data = await response.json();
+                data.forEach(pedido => {
+                    const row = tabla.insertRow();
+                    row.innerHTML = `<td>${pedido.id}</td><td>${pedido.producto_id}</td><td>${pedido.cantidad}</td><td>${pedido.cliente}</td><td>${pedido.fecha}</td>`;
+                });
+            } catch (error) {
+                console.error('Error al cargar pedidos:', error);
+            }
+        }
+
+        // Cargar productos al iniciar
+        window.onload = cargarProductos;
+    </script>
+</body>
+</html>
