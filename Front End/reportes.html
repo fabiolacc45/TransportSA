@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title>Reportes</title>
+    <title>Reportes de Pedidos</title>
     <style>
-        /* Variables de color */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -60,15 +58,9 @@
             margin-top: 1rem;
             cursor: pointer;
         }
-
-        select, input {
-            padding: 0.5rem;
-            margin-bottom: 1rem;
-            width: 100%;
-            max-width: 300px;
-            display: block;
-        }
     </style>
+    <!-- Añadir la biblioteca jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <nav>
@@ -79,28 +71,58 @@
         <button onclick="location.href='reportes.html'">Reportes</button>
         <button onclick="location.href='index.html'">Inicio</button>
     </nav>
-    <header><h1>Reportes</h1></header>
-    <nav><button onclick="generarReporte()">Generar Reporte de Ventas</button></nav>
+    <header><h1>Reportes de Pedidos</h1></header>
     <div class="vista">
-        <h2>Reporte de Ventas</h2>
+        <h2>Pedidos</h2>
         <table id="tablaReportes">
-            <thead><tr><th>ID Pedido</th><th>Producto</th><th>Cantidad</th><th>Fecha</th></tr></thead>
+            <thead><tr><th>ID</th><th>Producto</th><th>Cantidad</th><th>Fecha</th><th>Acción</th></tr></thead>
             <tbody></tbody>
         </table>
+        <button onclick="cargarPedidos()">Cargar Pedidos</button>
     </div>
 
     <script>
-        async function generarReporte() {
+        async function cargarPedidos() {
             const tabla = document.getElementById('tablaReportes').querySelector('tbody');
-            tabla.innerHTML = '';
+            tabla.innerHTML = ''; // Limpiar la tabla antes de llenarla con nuevos datos
             try {
-                const response = await fetch('http://localhost:5000/reportes');
+                const response = await fetch('http://localhost:5000/pedidos');
                 const data = await response.json();
-                data.forEach(reporte => {
+
+                data.forEach(pedido => {
                     const row = tabla.insertRow();
-                    row.innerHTML = `<td>${reporte.id}</td><td>${reporte.producto_id}</td><td>${reporte.cantidad}</td><td>${reporte.fecha}</td>`;
+                    row.innerHTML = `
+                        <td>${pedido.id}</td>
+                        <td>${pedido.producto_nombre}</td>
+                        <td>${pedido.cantidad}</td>
+                        <td>${pedido.fecha}</td>
+                        <td><button onclick="generarFactura(${pedido.id}, '${pedido.producto_nombre}', ${pedido.cantidad}, '${pedido.fecha}')">Descargar Factura</button></td>
+                    `;
                 });
-            } catch (error) { console.error("Error al generar reporte:", error); }
+            } catch (error) {
+                console.error("Error al cargar pedidos:", error);
+            }
+        }
+
+        function generarFactura(id, producto, cantidad, fecha) {
+            // Generar un código único para la factura
+            const codigoFactura = 'FACT-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+
+            // Crear un nuevo documento PDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Añadir el contenido de la factura al PDF
+            doc.setFontSize(12);
+            doc.text(`Factura de Pedido`, 10, 10);
+            doc.text(`Código de Factura: ${codigoFactura}`, 10, 20);
+            doc.text(`ID de Pedido: ${id}`, 10, 30);
+            doc.text(`Producto: ${producto}`, 10, 40);
+            doc.text(`Cantidad: ${cantidad}`, 10, 50);
+            doc.text(`Fecha: ${fecha}`, 10, 60);
+
+            // Descargar el PDF con el código de factura como nombre de archivo
+            doc.save(`Factura_${codigoFactura}.pdf`);
         }
     </script>
 </body>
