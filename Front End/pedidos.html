@@ -99,10 +99,11 @@
             <label for="cantidad">Cantidad:</label>
             <input type="number" id="cantidad" required><br><br>
 
-            <label for="cliente">Cliente:</label>
-            <input type="text" id="cliente" required><br><br>
+            <label for="cliente">Seleccionar Cliente:</label>
+            <select id="cliente" required>
+                <option value="">Seleccione un cliente</option>
+            </select><br><br>
 
-            <!-- Nuevo campo para seleccionar fecha automáticamente -->
             <label for="fecha">Fecha:</label>
             <input type="date" id="fecha" required><br><br>
 
@@ -159,6 +160,28 @@
             }
         }
 
+        // Cargar clientes al cargar la página
+        async function cargarClientes() {
+            try {
+                const response = await fetch('http://localhost:5000/usuarios');
+                const clientes = await response.json();
+                const selectCliente = document.getElementById('cliente');
+
+                // Limpiar opciones existentes
+                selectCliente.innerHTML = '';
+
+                // Agregar clientes al select
+                clientes.forEach(cliente => {
+                    const option = document.createElement('option');
+                    option.value = cliente.id;
+                    option.textContent = cliente.nombre;
+                    selectCliente.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error al cargar clientes:', error);
+            }
+        }
+
         // Configurar la fecha actual en el campo de fecha
         function setFechaActual() {
             const fechaInput = document.getElementById('fecha');
@@ -172,13 +195,13 @@
 
             const productoId = document.getElementById('producto').value;
             const cantidad = document.getElementById('cantidad').value;
-            const cliente = document.getElementById('cliente').value;
+            const clienteId = document.getElementById('cliente').value;
             const fecha = document.getElementById('fecha').value;
 
             const pedido = {
                 producto_id: productoId,
                 cantidad: cantidad,
-                cliente: cliente,
+                cliente_id: clienteId,
                 fecha: fecha
             };
 
@@ -203,32 +226,45 @@
 
         // Obtener pedidos
         function obtenerPedidos() {
-            fetch('http://localhost:5000/pedidos')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error al cargar pedidos');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (Array.isArray(data)) {
-                        data.forEach(pedido => {
-                            console.log(pedido); // Imprime el pedido para verificar
-                            // Agrega aquí el código para mostrar los pedidos en el HTML
-                        });
-                    } else {
-                        console.error('La respuesta no es un array:', data);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al cargar pedidos:', error);
+    console.log("Función obtenerPedidos() llamada"); // Añade esto para verificar
+    fetch('http://localhost:5000/pedidos')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al cargar pedidos');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Datos recibidos:", data); // Verificar los datos recibidos
+            if (Array.isArray(data)) {
+                const tbody = document.getElementById('tablaPedidos').querySelector('tbody');
+                tbody.innerHTML = ''; // Limpia la tabla antes de agregar nuevos pedidos
+
+                data.forEach(pedido => {
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td>${pedido.id}</td>
+                        <td>${pedido.producto_nombre}</td>
+                        <td>${pedido.cantidad}</td>
+                        <td>${pedido.cliente}</td>
+                        <td>${pedido.fecha}</td>
+                    `;
+                    tbody.appendChild(fila);
                 });
-        }
+            } else {
+                console.error('La respuesta no es un array:', data);
+            }
+        })
+        .catch(error => {
+            console.error('Error al cargar pedidos:', error);
+        });
+}
 
 
-        // Cargar productos y configurar fecha al iniciar
+        // Cargar productos y clientes, y configurar fecha al iniciar
         window.onload = () => {
             cargarProductos();
+            cargarClientes();
             setFechaActual();
         };
     </script>

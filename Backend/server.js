@@ -137,25 +137,51 @@ app.delete('/clientes/:id', (req, res) => {
 // Pedidos
 app.post('/pedidos', (req, res) => {
     const { producto_id, cliente_id, cantidad, fecha } = req.body;
-    db.run('INSERT INTO pedidos (producto_id, cliente_id, cantidad, fecha) VALUES (?, ?, ?, ?)', [producto_id, cliente_id, cantidad, fecha], function(err) {
+
+    // Verificar el stock del producto antes de crear el pedido
+    db.get('SELECT stock FROM productos WHERE id = ?', [producto_id], (err, row) => {
         if (err) {
-            return res.status(500).json({ error: err.message });
+            return res.status(500).json({ error: "Error al verificar el stock del producto." });
         }
-        res.status(201).json({ id: this.lastID, producto_id, cliente_id, cantidad, fecha });
+        if (!row) {
+            return res.status(404).json({ error: "Producto no encontrado." });
+        }
+        if (row.stock < cantidad) {
+            return res.status(400).json({ error: "Stock insuficiente para realizar el pedido." });
+        }
+
+        // Crear el pedido si hay suficiente stock
+        db.run('INSERT INTO pedidos (producto_id, cliente_id, cantidad, fecha) VALUES (?, ?, ?, ?)', [producto_id, cliente_id, cantidad, fecha], function(err) {
+            if (err) {
+                return res.status(500).json({ error: "Error al crear el pedido." });
+            }
+
+            // Actualizar el stock después de crear el pedido
+            db.run('UPDATE productos SET stock = stock - ? WHERE id = ?', [cantidad, producto_id], (err) => {
+                if (err) {
+                    return res.status(500).json({ error: "Error al actualizar el stock del producto." });
+                }
+                res.status(201).json({ message: "Pedido creado y stock actualizado exitosamente.", id: this.lastID, producto_id, cliente_id, cantidad, fecha });
+            });
+        });
     });
 });
-
+//para obtener los pedidos
 app.get('/pedidos', (req, res) => {
-    db.all(`
-        SELECT pedidos.id, productos.nombre AS producto, pedidos.cantidad, clientes.nombre AS cliente, pedidos.fecha
+    const query = `
+        SELECT pedidos.id, productos.nombre AS producto_nombre, pedidos.cantidad, usuarios.nombre AS cliente, pedidos.fecha 
         FROM pedidos
         JOIN productos ON pedidos.producto_id = productos.id
-        JOIN clientes ON pedidos.cliente_id = clientes.id
-    `, [], (err, rows) => {
+        JOIN usuarios ON pedidos.cliente_id = usuarios.id;
+    `;
+
+    db.all(query, (err, rows) => {
         if (err) {
-            return res.status(500).json({ error: err.message });
+            console.error('Error al obtener pedidos:', err);
+            res.status(500).json({ error: 'Error al obtener los pedidos' });
+        } else {
+            res.json(rows); // Enviar los resultados al frontend
         }
-        res.json(rows);
     });
 });
 
