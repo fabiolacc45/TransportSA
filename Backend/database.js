@@ -39,14 +39,30 @@ const db = new sqlite3.Database('./database.db', (err) => {
             }
         });
 
-        // Crear tabla de pedidos si no existe
+        // Crear tabla de clientes si no existe
         db.run(`
-           CREATE TABLE IF NOT EXISTS pedidos (
+            CREATE TABLE IF NOT EXISTS clientes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre TEXT NOT NULL
+            );
+        `, (err) => {
+            if (err) {
+                console.error("Error al crear la tabla 'clientes':", err.message);
+            } else {
+                console.log("Tabla 'clientes' verificada o creada exitosamente.");
+            }
+        });
+
+        // Crear tabla de pedidos si no existe (con la columna cliente_id)
+        db.run(`
+            CREATE TABLE IF NOT EXISTS pedidos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 producto_id INTEGER,
+                cliente_id INTEGER,  -- Columna para cliente
                 cantidad INTEGER,
                 fecha TEXT,
-                FOREIGN KEY (producto_id) REFERENCES productos(id)
+                FOREIGN KEY (producto_id) REFERENCES productos(id),
+                FOREIGN KEY (cliente_id) REFERENCES clientes(id) -- Relación con clientes
             );
         `, (err) => {
             if (err) {

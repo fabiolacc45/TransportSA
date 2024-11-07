@@ -102,6 +102,10 @@
             <label for="cliente">Cliente:</label>
             <input type="text" id="cliente" required><br><br>
 
+            <!-- Nuevo campo para seleccionar fecha automáticamente -->
+            <label for="fecha">Fecha:</label>
+            <input type="date" id="fecha" required><br><br>
+
             <button type="submit">Crear Pedido</button>
         </form>
         <p id="mensajePedido"></p>
@@ -147,12 +151,19 @@
                 productos.forEach(producto => {
                     const option = document.createElement('option');
                     option.value = producto.id;
-                    option.textContent = `${producto.nombre} (ID: ${producto.id})`;
+                    option.textContent = `${producto.nombre} (Stock: ${producto.stock})`;
                     selectProducto.appendChild(option);
                 });
             } catch (error) {
                 console.error('Error al cargar productos:', error);
             }
+        }
+
+        // Configurar la fecha actual en el campo de fecha
+        function setFechaActual() {
+            const fechaInput = document.getElementById('fecha');
+            const fechaActual = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+            fechaInput.value = fechaActual;
         }
 
         // Crear pedido
@@ -162,12 +173,13 @@
             const productoId = document.getElementById('producto').value;
             const cantidad = document.getElementById('cantidad').value;
             const cliente = document.getElementById('cliente').value;
+            const fecha = document.getElementById('fecha').value;
 
             const pedido = {
                 producto_id: productoId,
                 cantidad: cantidad,
                 cliente: cliente,
-                fecha: new Date().toISOString()
+                fecha: fecha
             };
 
             try {
@@ -176,32 +188,49 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(pedido),
                 });
+
                 const data = await response.json();
-                document.getElementById('mensajePedido').textContent = data.mensaje || data.error;
+
+                if (response.status === 400) {
+                    document.getElementById('mensajePedido').textContent = data.error;  // Muestra el mensaje de error
+                } else {
+                    document.getElementById('mensajePedido').textContent = data.mensaje || 'Pedido creado exitosamente';
+                }
             } catch (error) {
                 document.getElementById('mensajePedido').textContent = 'Error al crear pedido';
             }
         }
 
         // Obtener pedidos
-        async function obtenerPedidos() {
-            const tabla = document.getElementById('tablaPedidos').querySelector('tbody');
-            tabla.innerHTML = ''; // Limpiar la tabla
-
-            try {
-                const response = await fetch('http://localhost:5000/pedidos');
-                const data = await response.json();
-                data.forEach(pedido => {
-                    const row = tabla.insertRow();
-                    row.innerHTML = `<td>${pedido.id}</td><td>${pedido.producto_id}</td><td>${pedido.cantidad}</td><td>${pedido.cliente}</td><td>${pedido.fecha}</td>`;
+        function obtenerPedidos() {
+            fetch('http://localhost:5000/pedidos')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al cargar pedidos');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        data.forEach(pedido => {
+                            console.log(pedido); // Imprime el pedido para verificar
+                            // Agrega aquí el código para mostrar los pedidos en el HTML
+                        });
+                    } else {
+                        console.error('La respuesta no es un array:', data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar pedidos:', error);
                 });
-            } catch (error) {
-                console.error('Error al cargar pedidos:', error);
-            }
         }
 
-        // Cargar productos al iniciar
-        window.onload = cargarProductos;
+
+        // Cargar productos y configurar fecha al iniciar
+        window.onload = () => {
+            cargarProductos();
+            setFechaActual();
+        };
     </script>
 </body>
 </html>

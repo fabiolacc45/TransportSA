@@ -5,14 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seguimiento de Pedidos</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; }
-        header { background-color: #4CAF50; color: #fff; padding: 1rem; text-align: center; }
-        .vista { padding: 1rem; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 0.5rem; border: 1px solid #ddd; text-align: center; }
+        /* Variables de color */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1rem;
+            background-color: #333;
+        }
+
+        nav button {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+        }
+
+        nav button:hover {
+            background-color: #45a049;
+        }
+
+        .vista {
+            padding: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        button {
+            padding: 0.3rem 0.6rem;
+            margin-top: 1rem;
+            cursor: pointer;
+        }
+
+        select, input {
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            width: 100%;
+            max-width: 300px;
+            display: block;
+        }
     </style>
 </head>
 <body>
+    <nav>
+        <button onclick="location.href='usuario.html'">Gestión de Usuarios</button>
+        <button onclick="location.href='pedidos.html'">Pedidos</button>
+        <button onclick="location.href='inventario.html'">Inventario</button>
+        <button onclick="location.href='seguimiento.html'">Seguimiento de Pedidos</button>
+        <button onclick="location.href='reportes.html'">Reportes</button>
+        <button onclick="location.href='index.html'">Inicio</button>
+    </nav>
     <header><h1>Seguimiento de Pedidos</h1></header>
     <div class="vista">
         <h2>Pedidos</h2>
