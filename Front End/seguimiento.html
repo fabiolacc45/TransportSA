@@ -91,15 +91,23 @@
     <script>
         async function cargarPedidos() {
             const tabla = document.getElementById('tablaSeguimiento').querySelector('tbody');
-            tabla.innerHTML = '';
+            tabla.innerHTML = '';  // Limpiar la tabla antes de llenarla con nuevos datos
             try {
                 const response = await fetch('http://localhost:5000/pedidos');
                 const data = await response.json();
+
                 data.forEach(pedido => {
                     const row = tabla.insertRow();
-                    row.innerHTML = `<td>${pedido.id}</td><td>${pedido.producto_id}</td><td>${pedido.cantidad}</td><td>${pedido.fecha}</td>`;
+                    row.innerHTML = `
+                        <td>${pedido.id}</td>
+                        <td>${pedido.producto_nombre}</td>
+                        <td>${pedido.cantidad}</td>
+                        <td>${pedido.fecha}</td>
+                    `;
                 });
-            } catch (error) { console.error("Error al cargar pedidos:", error); }
+            } catch (error) {
+                console.error("Error al cargar pedidos:", error);
+            }
         }
     </script>
 </body>
